@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RFT Owner Dashboard 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #181818;
+    --border: #222222;
+    --accent: #e8ff47;
+    --accent2: #ff4747;
+    --accent3: #47c8ff;
+    --text: #f0f0f0;
+    --muted: #666666;
+    --good: #4dff91;
+    --warn: #ffb347;
+    --bad: #ff4747;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* GRAIN OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .logo-main {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--good);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--good);
+    border-radius: 50%;
+    animation: pulse 2s ease infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .tab {
+    padding: 14px 24px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    font-weight: 500;
+    position: relative;
+    top: 1px;
+  }
+
+  .tab:hover { color: var(--text); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* MAIN LAYOUT */
+  .main {
+    padding: 28px 32px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* SECTION HEADERS */
+  .section-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .section-label:first-child { margin-top: 0; }
+
+  /* KPI GRID */
+  .kpi-grid {
+    display: grid;
+    gap: 12px;
+  }
+
+  .kpi-grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .kpi-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .kpi-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .kpi-grid-5 { grid-template-columns: repeat(5, 1fr); }
+  .kpi-grid-6 { grid-template-columns: repeat(6, 1fr); }
+
+  /* KPI CARD */
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .kpi:hover { border-color: #333; }
+
+  .kpi.hero {
+    background: linear-gradient(135deg, #161616 0%, #111 100%);
+    border-color: var(--accent);
+    border-width: 1px;
+  }
+
+  .kpi.hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .kpi-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .kpi-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    line-height: 1;
+    color: var(--text);
+    letter-spacing: 1px;
+  }
+
+  .kpi.hero .kpi-value {
+    font-size: 48px;
+    color: var(--accent);
+  }
+
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .kpi-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-top: 6px;
+  }
+
+  .delta-good { background: rgba(77,255,145,0.1); color: var(--good); }
+  .delta-bad { background: rgba(255,71,71,0.1); color: var(--bad); }
+  .delta-warn { background: rgba(255,179,71,0.1); color: var(--warn); }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    margin-top: 10px;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
+
+  .fill-good { background: var(--good); }
+  .fill-warn { background: var(--warn); }
+  .fill-accent { background: var(--accent); }
+  .fill-blue { background: var(--accent3); }
+
+  /* GOAL TRACKER */
+  .goal-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .goal-row:last-child { border-bottom: none; }
+
+  .goal-name {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+
+  .goal-values {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .goal-actual {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .goal-target {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* SPARKLINE */
+  .sparkline-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .sparkline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .sparkline-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .sparkline-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--text);
+    margin-top: 4px;
+  }
+
+  canvas { width: 100% !important; display: block; }
+
+  /* TWO COL */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* TABLE */
+  .data-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .data-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .data-table th {
+    background: var(--surface2);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .data-table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid #161616;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+  }
+
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .td-label {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .td-good { color: var(--good); }
+  .td-warn { color: var(--warn); }
+  .td-bad { color: var(--bad); }
+  .td-accent { color: var(--accent); }
+
+  /* WEEKLY WEEK SELECTOR */
+  .week-selector {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .week-btn {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: none;
+    color: var(--muted);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+  }
+
+  .week-btn:hover { border-color: #444; color: var(--text); }
+  .week-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(232,255,71,0.06); }
+
+  /* STATUS PILLS */
+  .pill {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .pill-good { background: rgba(77,255,145,0.12); color: var(--good); }
+  .pill-warn { background: rgba(255,179,71,0.12); color: var(--warn); }
+  .pill-bad { background: rgba(255,71,71,0.12); color: var(--bad); }
+
+  /* GAUGE */
+  .gauge-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+  }
+
+  .gauge-svg { width: 120px; height: 70px; }
+
+  /* MONTH SELECTOR */
+  .month-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .month-btn {
+    padding: 6px 16px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: none;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+  }
+
+  .month-btn:hover { border-color: #444; color: var(--text); }
+  .month-btn.active { border-color: var(--accent3); color: var(--accent3); background: rgba(71,200,255,0.06); }
+
+  /* CHART CONTAINER */
+  .chart-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .chart-box-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* DAILY INPUT */
+  .daily-grid {
+    display: grid;
+    grid-template-columns: repeat(11, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .daily-header {
+    background: var(--surface2);
+    padding: 10px 8px;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  .daily-cell {
+    background: var(--surface);
+    padding: 8px;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+  }
+
+  .daily-cell.day-num {
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .daily-cell.empty { color: #333; }
+
+  /* SCROLLABLE WEEK TABLE */
+  .scroll-table-wrap {
+    overflow-x: auto;
+  }
+
+  .scroll-table-wrap::-webkit-scrollbar { height: 4px; }
+  .scroll-table-wrap::-webkit-scrollbar-track { background: var(--border); }
+  .scroll-table-wrap::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
+
+  /* FOOTER */
+  .footer {
+    padding: 20px 32px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+  }
+
+  .footer-text {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .kpi-grid-6 { grid-template-columns: repeat(3, 1fr); }
+    .kpi-grid-5 { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  @media (max-width: 900px) {
+    .kpi-grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .kpi-grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .three-col { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .main { padding: 20px 16px; }
+    .header { padding: 16px; }
+    .tabs { padding: 0 16px; }
+  }
+
+  @media (max-width: 600px) {
+    .kpi-grid-4 { grid-template-columns: 1fr 1fr; }
+    .kpi-grid-6 { grid-template-columns: 1fr 1fr; }
+  }
+
+  .gap-top { margin-top: 12px; }
+
+  /* ANIMATE IN */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .view.active .kpi,
+  .view.active .sparkline-wrap,
+  .view.active .data-table,
+  .view.active .chart-box {
+    animation: fadeUp 0.35s ease both;
+  }
+
+  .view.active .kpi:nth-child(2) { animation-delay: 0.04s; }
+  .view.active .kpi:nth-child(3) { animation-delay: 0.08s; }
+  .view.active .kpi:nth-child(4) { animation-delay: 0.12s; }
+  .view.active .kpi:nth-child(5) { animation-delay: 0.16s; }
+  .view.active .kpi:nth-child(6) { animation-delay: 0.20s; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-main">RFT</div>
+    <div class="logo-sub">Owner Dashboard · 2026</div>
+  </div>
+  <div class="header-right">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      <span id="current-date"></span>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('monthly')">Monthly</div>
+  <div class="tab" onclick="switchTab('weekly')">Weekly</div>
+  <div class="tab" onclick="switchTab('daily')">Daily</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ===== MONTHLY VIEW ===== -->
+  <div class="view active" id="view-monthly">
+
+    <div class="month-selector">
+      <button class="month-btn active" onclick="switchMonth('jan', this)">Jan</button>
+      <button class="month-btn" onclick="switchMonth('feb', this)">Feb</button>
+      <button class="month-btn disabled" style="opacity:0.3;cursor:default">Mar</button>
+    </div>
+
+    <div class="section-label">Financial</div>
+    <div class="kpi-grid kpi-grid-4">
+      <div class="kpi hero">
+        <div class="kpi-label">Rolling 30-Day Revenue</div>
+        <div class="kpi-value" id="m-rolling">$103,550</div>
+        <div class="kpi-sub">Target: $95,000 (Jan) / $96,000 (Feb)</div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill fill-accent" id="m-rolling-bar" style="width:109%"></div></div>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg Weekly Revenue</div>
+        <div class="kpi-value" id="m-weekly-rev">$21,634</div>
+        <div class="kpi-sub">Target: $23,500</div>
+        <div class="kpi-delta delta-warn" id="m-weekly-delta">↓ Below target</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Weekly DD Total</div>
+        <div class="kpi-value" id="m-dd">$19,643</div>
+        <div class="kpi-sub" id="m-dd-sub">Target: $23,500</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Revenue Difference</div>
+        <div class="kpi-value" id="m-diff">+$240</div>
+        <div class="kpi-sub">Added vs Lost revenue</div>
+        <div class="kpi-delta" id="m-diff-delta">—</div>
+      </div>
+    </div>
+
+    <div class="kpi-grid kpi-grid-4 gap-top">
+      <div class="kpi">
+        <div class="kpi-label">Avg Member Spend</div>
+        <div class="kpi-value" id="m-avg-spend">$96</div>
+        <div class="kpi-sub">Per member / week</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Failed DD</div>
+        <div class="kpi-value td-bad" id="m-failed-dd">$1,909</div>
+        <div class="kpi-sub">Monthly total</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Added Revenue</div>
+        <div class="kpi-value td-good" id="m-added">$1,132</div>
+        <div class="kpi-sub">Upgrades / new MRR</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Lost Revenue</div>
+        <div class="kpi-value td-bad" id="m-lost">$892</div>
+        <div class="kpi-sub">Downgrades / cancels</div>
+      </div>
+    </div>
+
+    <div class="section-label">Members</div>
+    <div class="kpi-grid kpi-grid-5">
+      <div class="kpi">
+        <div class="kpi-label">Total Clients</div>
+        <div class="kpi-value" id="m-total">214</div>
+        <div class="kpi-sub">Goal: <span id="m-total-goal">218</span></div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill fill-blue" id="m-total-bar" style="width:98%"></div></div>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Active Clients</div>
+        <div class="kpi-value" id="m-active">207</div>
+        <div class="kpi-sub" id="m-suspended-sub">7 suspended (3.3%)</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">PT Clients</div>
+        <div class="kpi-value" id="m-pt">73</div>
+        <div class="kpi-sub">Personal training</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">SPT Clients</div>
+        <div class="kpi-value" id="m-spt">142</div>
+        <div class="kpi-sub">Small group PT</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Net Gain/Loss</div>
+        <div class="kpi-value td-good" id="m-net">+3</div>
+        <div class="kpi-sub">Target: Net 8</div>
+      </div>
+    </div>
+
+    <div class="section-label">Retention</div>
+    <div class="kpi-grid kpi-grid-4">
+      <div class="kpi">
+        <div class="kpi-label">Monthly Cancellations</div>
+        <div class="kpi-value" id="m-cancels">8</div>
+        <div class="kpi-sub">Target: ≤ 2% churn</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Churn Rate</div>
+        <div class="kpi-value" id="m-churn">3.74%</div>
+        <div class="kpi-sub">Target: ≤ 2%</div>
+        <div class="kpi-delta delta-bad" id="m-churn-delta">↑ Above target</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Avg Length of Stay</div>
+        <div class="kpi-value" id="m-los">31 mo</div>
+        <div class="kpi-sub">Average tenure</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Red Flags</div>
+        <div class="kpi-value td-warn" id="m-redflags">28</div>
+        <div class="kpi-sub">At-risk members</div>
+      </div>
+    </div>
+
+    <div class="section-label">Marketing & Sales</div>
+    <div class="kpi-grid kpi-grid-6">
+      <div class="kpi">
+        <div class="kpi-label">Total Leads</div>
+        <div class="kpi-value" id="m-leads">51</div>
+        <div class="kpi-sub" id="m-leads-sub">30 paid · 21 organic</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Cost Per Lead</div>
+        <div class="kpi-value" id="m-cpl">$101</div>
+        <div class="kpi-sub">Paid ads</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Booking %</div>
+        <div class="kpi-value" id="m-book">27.5%</div>
+        <div class="kpi-sub">Leads → booked</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Consults Completed</div>
+        <div class="kpi-value" id="m-consults">12</div>
+        <div class="kpi-sub" id="m-consults-sub">of 11 booked</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Conversion %</div>
+        <div class="kpi-value td-good" id="m-conv">91.7%</div>
+        <div class="kpi-sub">Consult → member</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Contract Value</div>
+        <div class="kpi-value" id="m-contract">$17,712</div>
+        <div class="kpi-sub">New contracts signed</div>
+      </div>
+    </div>
+
+    <div class="section-label">Engagement & Staff</div>
+    <div class="kpi-grid kpi-grid-5">
+      <div class="kpi">
+        <div class="kpi-label">Total Studio Visits</div>
+        <div class="kpi-value" id="m-visits">473</div>
+        <div class="kpi-sub" id="m-visits-sub">2.3 avg per member</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">POD Utilisation</div>
+        <div class="kpi-value" id="m-pod">51.2%</div>
+        <div class="kpi-sub">Weekly avg</div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill fill-warn" id="m-pod-bar" style="width:51%"></div></div>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">GPT Utilisation</div>
+        <div class="kpi-value" id="m-gpt">35.5%</div>
+        <div class="kpi-sub">Weekly avg</div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill fill-blue" style="width:35%"></div></div>
+        </div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">LER</div>
+        <div class="kpi-value" id="m-ler">2.33</div>
+        <div class="kpi-sub">Labour efficiency ratio</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">5-Star Reviews</div>
+        <div class="kpi-value td-good" id="m-reviews">3</div>
+        <div class="kpi-sub">This month</div>
+      </div>
+    </div>
+
+    <!-- MONTHLY GOALS vs ACTUALS TABLE -->
+    <div class="section-label">Monthly Targets vs Actuals</div>
+    <div class="data-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Jan Actual</th>
+            <th>Jan Target</th>
+            <th>Status</th>
+            <th>Feb Actual</th>
+            <th>Feb Target</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="td-label">Rolling 30-Day Revenue</td>
+            <td class="td-accent">$103,550</td>
+            <td class="td-label">$95,000</td>
+            <td><span class="pill pill-good">✓ Achieved</span></td>
+            <td class="td-accent">$111,775</td>
+            <td class="td-label">$96,000</td>
+            <td><span class="pill pill-good">✓ Achieved</span></td>
+          </tr>
+          <tr>
+            <td class="td-label">Total Clients</td>
+            <td>214</td>
+            <td class="td-label">218</td>
+            <td><span class="pill pill-warn">↑ Close</span></td>
+            <td>225</td>
+            <td class="td-label">226</td>
+            <td><span class="pill pill-warn">↑ Close</span></td>
+          </tr>
+          <tr>
+            <td class="td-label">Net Member Growth</td>
+            <td class="td-good">+3</td>
+            <td class="td-label">Net 8</td>
+            <td><span class="pill pill-warn">↑ Below</span></td>
+            <td class="td-good">+10</td>
+            <td class="td-label">Net 8</td>
+            <td><span class="pill pill-good">✓ Achieved</span></td>
+          </tr>
+          <tr>
+            <td class="td-label">Retention Target</td>
+            <td class="td-bad">96.3%</td>
+            <td class="td-label">98%</td>
+            <td><span class="pill pill-bad">✗ Miss</span></td>
+            <td class="td-bad">96.4%</td>
+            <td class="td-label">98%</td>
+            <td><span class="pill pill-bad">✗ Miss</span></td>
+          </tr>
+          <tr>
+            <td class="td-label">Weekly DD Goal</td>
+            <td>$19,643</td>
+            <td class="td-label">$23,500</td>
+            <td><span class="pill pill-bad">✗ Miss</span></td>
+            <td>$21,478</td>
+            <td class="td-label">$24,000</td>
+            <td><span class="pill pill-bad">✗ Miss</span></td>
+          </tr>
+          <tr>
+            <td class="td-label">Sales Conversion</td>
+            <td class="td-good">91.7%</td>
+            <td class="td-label">—</td>
+            <td><span class="pill pill-good">✓ Strong</span></td>
+            <td class="td-good">81.8%</td>
+            <td class="td-label">—</td>
+            <td><span class="pill pill-good">✓ Strong</span></td>
+          </tr>
+          <tr>
+            <td class="td-label">Contract Value</td>
+            <td class="td-accent">$17,712</td>
+            <td class="td-label">—</td>
+            <td><span class="pill pill-good">✓ Strong</span></td>
+            <td class="td-accent">$38,411</td>
+            <td class="td-label">—</td>
+            <td><span class="pill pill-good">✓ Strong</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ===== WEEKLY VIEW ===== -->
+  <div class="view" id="view-weekly">
+
+    <div class="week-selector" id="week-selector">
+      <!-- Populated by JS -->
+    </div>
+
+    <div class="section-label">Financial — Week of <span id="week-date-label">05 Jan</span></div>
+    <div class="kpi-grid kpi-grid-4">
+      <div class="kpi hero">
+        <div class="kpi-label">Rolling 30-Day Revenue</div>
+        <div class="kpi-value" id="w-rolling">—</div>
+        <div class="kpi-sub">Target: $95,000+</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Weekly Revenue</div>
+        <div class="kpi-value" id="w-revenue">—</div>
+        <div class="kpi-sub">Target: $23,500</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Weekly DD</div>
+        <div class="kpi-value" id="w-dd">—</div>
+        <div class="kpi-sub">Direct debit collected</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Failed DD</div>
+        <div class="kpi-value td-bad" id="w-failed">—</div>
+        <div class="kpi-sub">Needs follow-up</div>
+      </div>
+    </div>
+
+    <div class="section-label">Members</div>
+    <div class="kpi-grid kpi-grid-5">
+      <div class="kpi">
+        <div class="kpi-label">Total Clients</div>
+        <div class="kpi-value" id="w-total">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Active</div>
+        <div class="kpi-value" id="w-active">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Suspended</div>
+        <div class="kpi-value td-warn" id="w-suspended">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Cancellations</div>
+        <div class="kpi-value td-bad" id="w-cancels">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Net Gain/Loss</div>
+        <div class="kpi-value" id="w-net">—</div>
+      </div>
+    </div>
+
+    <div class="section-label">Marketing & Sales</div>
+    <div class="kpi-grid kpi-grid-4">
+      <div class="kpi">
+        <div class="kpi-label">Total Leads</div>
+        <div class="kpi-value" id="w-leads">—</div>
+        <div class="kpi-sub" id="w-leads-sub">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Booked In</div>
+        <div class="kpi-value" id="w-booked">—</div>
+        <div class="kpi-sub" id="w-booking-pct">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Sales Converted</div>
+        <div class="kpi-value td-good" id="w-sales">—</div>
+        <div class="kpi-sub" id="w-conv-pct">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Contract Value</div>
+        <div class="kpi-value" id="w-contract">—</div>
+      </div>
+    </div>
+
+    <div class="section-label">Engagement & Staff</div>
+    <div class="kpi-grid kpi-grid-5">
+      <div class="kpi">
+        <div class="kpi-label">Studio Visits</div>
+        <div class="kpi-value" id="w-visits">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">POD Utilisation</div>
+        <div class="kpi-value" id="w-pod">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">GPT Utilisation</div>
+        <div class="kpi-value" id="w-gpt">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Red Flags</div>
+        <div class="kpi-value td-warn" id="w-redflags">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">LER</div>
+        <div class="kpi-value" id="w-ler">—</div>
+      </div>
+    </div>
+
+    <!-- Weekly trend table -->
+    <div class="section-label">Weekly Snapshot — All Weeks</div>
+    <div class="data-table">
+      <div class="scroll-table-wrap">
+        <table id="weekly-trend-table">
+          <thead>
+            <tr>
+              <th>Week</th>
+              <th>Rolling 30d Rev</th>
+              <th>Weekly Rev</th>
+              <th>Clients</th>
+              <th>Cancels</th>
+              <th>Net</th>
+              <th>Leads</th>
+              <th>Sales</th>
+              <th>Conversion</th>
+              <th>Visits</th>
+              <th>LER</th>
+            </tr>
+          </thead>
+          <tbody id="weekly-trend-body">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== DAILY VIEW ===== -->
+  <div class="view" id="view-daily">
+
+    <div class="month-selector">
+      <button class="month-btn active" onclick="switchDailyMonth('jan', this)">Jan</button>
+      <button class="month-btn" onclick="switchDailyMonth('feb', this)">Feb</button>
+      <button class="month-btn" onclick="switchDailyMonth('mar', this)">Mar</button>
+    </div>
+
+    <div class="section-label">Daily Activity — <span id="daily-month-label">January</span></div>
+
+    <!-- DAILY TARGETS -->
+    <div class="kpi-grid kpi-grid-5 gap-top" style="margin-bottom:16px">
+      <div class="kpi">
+        <div class="kpi-label">Monthly Lead Target</div>
+        <div class="kpi-value">90</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Monthly Trial Target</div>
+        <div class="kpi-value">15</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Monthly Sales Target</div>
+        <div class="kpi-value">28</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Cancel Target</div>
+        <div class="kpi-value">≤ 8</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Monthly $ Target</div>
+        <div class="kpi-value">$12,000</div>
+      </div>
+    </div>
+
+    <div class="data-table">
+      <div class="scroll-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Day</th>
+              <th>Leads</th>
+              <th>Calls</th>
+              <th>Convos</th>
+              <th>Bookings</th>
+              <th>Trials (Paid)</th>
+              <th>Consults</th>
+              <th>Sales</th>
+              <th>Cancels</th>
+              <th>Net</th>
+              <th>Check-in Calls</th>
+              <th>$ Value</th>
+            </tr>
+          </thead>
+          <tbody id="daily-table-body">
+          </tbody>
+          <tfoot>
+            <tr style="background:var(--surface2)">
+              <td style="color:var(--muted);font-size:10px;letter-spacing:1px;text-transform:uppercase;font-family:'DM Sans',sans-serif">Total</td>
+              <td colspan="11" style="color:var(--muted);font-size:11px">No data entered yet for this month</td>
+            </tr>
+            <tr style="background:#0f1a0a">
+              <td style="color:var(--good);font-size:10px;letter-spacing:1px;text-transform:uppercase;font-family:'DM Sans',sans-serif">Target</td>
+              <td class="td-good">90</td>
+              <td class="td-good">1000</td>
+              <td class="td-good">90</td>
+              <td class="td-good">36</td>
+              <td class="td-good">15</td>
+              <td class="td-good">21</td>
+              <td class="td-good">28</td>
+              <td class="td-good">8</td>
+              <td class="td-good">20</td>
+              <td class="td-good">150</td>
+              <td class="td-good">$12,000</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-top:24px">Daily KPI Glossary</div>
+    <div class="data-table">
+      <table>
+        <thead><tr><th>Metric</th><th>What it means</th><th>Monthly Target</th></tr></thead>
+        <tbody>
+          <tr><td class="td-label">Leads</td><td>New inquiries received (paid + organic)</td><td>90</td></tr>
+          <tr><td class="td-label">Calls</td><td>Outbound calls made to leads</td><td>1,000</td></tr>
+          <tr><td class="td-label">Convos</td><td>Meaningful conversations with leads</td><td>90</td></tr>
+          <tr><td class="td-label">Bookings</td><td>Trial/consult sessions booked</td><td>36</td></tr>
+          <tr><td class="td-label">Trials (Paid)</td><td>Paid intro sessions completed</td><td>15</td></tr>
+          <tr><td class="td-label">Consults (Booked)</td><td>Sales consultations scheduled</td><td>21</td></tr>
+          <tr><td class="td-label">Sales (Rollovers)</td><td>New memberships signed</td><td>28</td></tr>
+          <tr><td class="td-label">Cancels</td><td>Membership cancellations</td><td>≤ 8</td></tr>
+          <tr><td class="td-label">Net</td><td>Sales minus Cancels</td><td>+20</td></tr>
+          <tr><td class="td-label">Check-in Calls</td><td>Retention calls to existing members</td><td>150</td></tr>
+          <tr><td class="td-label">$ Value</td><td>Revenue value of new sales that day</td><td>$12,000</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-text">RFT Owner Studio Dashboard · Castle Hill NSW · 2026</div>
+  <div class="footer-text">Data sourced from RFT Google Sheet</div>
+</div>
+
+<script>
+// =====================
+// DATA
+// =====================
+
+const weeklyData = [
+  { date: '05 Jan', rolling: '$109,200', revenue: '$23,417', dd: '$19,297', failedDD: '$436', addedRev: '$160', lostRev: '$218', diff: '-$58', total: 210, active: 203, suspended: 7, cancels: 2, net: -1, paidLeads: 3, organicLeads: 2, totalLeads: 5, cpl: '$175', booked: 2, trials: 2, trialRev: '$154', trialCompleted: 1, consultsBooked: 2, consultsCompleted: 2, salesConverted: 1, contractValue: '$2,560', conversion: '50.0%', reviews: 0, lateCancel: 9, under2: 95, podAttend: 206, podUtil: '42.9%', ptAttend: 96, gptAttend: 123, gptUtil: '31.0%', visits: 425, avgVisits: 2.09, avgHours: 31.25, wages: '$7,785', wagePct: '33.3%', ler: 3.01, redflags: 26 },
+  { date: '12 Jan', rolling: '$101,100', revenue: '$20,047', dd: '$18,696', failedDD: '$935', addedRev: '$405', lostRev: '$337', diff: '$68', total: 211, active: 204, suspended: 7, cancels: 3, net: 1, paidLeads: 3, organicLeads: 7, totalLeads: 10, cpl: '$87', booked: 5, trials: 1, trialRev: '$99', trialCompleted: 1, consultsBooked: 4, consultsCompleted: 4, salesConverted: 4, contractValue: '$6,480', conversion: '100.0%', reviews: 0, lateCancel: 14, under2: 81, podAttend: 236, podUtil: '49.1%', ptAttend: 103, gptAttend: 145, gptUtil: '36.9%', visits: 484, avgVisits: 2.37, avgHours: 31.00, wages: '$10,092', wagePct: '50.3%', ler: 1.99, redflags: 24 },
+  { date: '19 Jan', rolling: '$101,600', revenue: '$22,612', dd: '$20,625', failedDD: '$218', addedRev: '$298', lostRev: '$228', diff: '$70', total: 212, active: 205, suspended: 7, cancels: 2, net: 1, paidLeads: 7, organicLeads: 8, totalLeads: 15, cpl: '$100', booked: 3, trials: 0, trialRev: '$0', trialCompleted: 1, consultsBooked: 2, consultsCompleted: 3, salesConverted: 3, contractValue: '$4,368', conversion: '100.0%', reviews: 2, lateCancel: 7, under2: 53, podAttend: 260, podUtil: '54.2%', ptAttend: 109, gptAttend: 135, gptUtil: '34.4%', visits: 504, avgVisits: 2.46, avgHours: 24.40, wages: '$10,092', wagePct: '44.6%', ler: 2.24, redflags: 36 },
+  { date: '26 Jan', rolling: '$102,300', revenue: '$20,458', dd: '$19,954', failedDD: '$320', addedRev: '$269', lostRev: '$109', diff: '$160', total: 214, active: 207, suspended: 7, cancels: 1, net: 2, paidLeads: 17, organicLeads: 4, totalLeads: 21, cpl: '$41', booked: 4, trials: 1, trialRev: '$150', trialCompleted: 0, consultsBooked: 3, consultsCompleted: 3, salesConverted: 3, contractValue: '$4,304', conversion: '100.0%', reviews: 1, lateCancel: 37, under2: 51, podAttend: 230, podUtil: '58.7%', ptAttend: 89, gptAttend: 158, gptUtil: '39.7%', visits: 477, avgVisits: 2.30, avgHours: 19.80, wages: '$9,762', wagePct: '47.7%', ler: 2.10, redflags: 24 },
+  { date: '02 Feb', rolling: '$106,500', revenue: '$25,830', dd: '$21,233', failedDD: '$444', addedRev: '$245', lostRev: '$218', diff: '$27', total: 214, active: 201, suspended: 13, cancels: 2, net: 0, paidLeads: 11, organicLeads: 6, totalLeads: 17, cpl: '$63', booked: 4, trials: 0, trialRev: '$0', trialCompleted: 0, consultsBooked: 4, consultsCompleted: 2, salesConverted: 2, contractValue: '$3,920', conversion: '100.0%', reviews: 0, lateCancel: 14, under2: 60, podAttend: 274, podUtil: '56.5%', ptAttend: 114, gptAttend: 150, gptUtil: '38.3%', visits: 538, avgVisits: 2.67, avgHours: 31.00, wages: '$9,520', wagePct: '36.9%', ler: 2.71, redflags: 22 },
+  { date: '09 Feb', rolling: '$109,600', revenue: '$25,238', dd: '$20,752', failedDD: '$0', addedRev: '$681', lostRev: '$96', diff: '$585', total: 219, active: 208, suspended: 11, cancels: 1, net: 5, paidLeads: 8, organicLeads: 4, totalLeads: 12, cpl: '$82', booked: 5, trials: 1, trialRev: '$299', trialCompleted: 3, consultsBooked: 9, consultsCompleted: 8, salesConverted: 6, contractValue: '$11,195', conversion: '75.0%', reviews: 1, lateCancel: 9, under2: 50, podAttend: 250, podUtil: '52.0%', ptAttend: 130, gptAttend: 140, gptUtil: '35.7%', visits: 520, avgVisits: 2.50, avgHours: 26.00, wages: '$9,776', wagePct: '38.7%', ler: 2.58, redflags: 34 },
+  { date: '16 Feb', rolling: '$116,200', revenue: '$23,135', dd: '$22,601', failedDD: '$218', addedRev: '$756', lostRev: '$487', diff: '$269', total: 222, active: 211, suspended: 11, cancels: 4, net: 2, paidLeads: 11, organicLeads: 5, totalLeads: 16, cpl: '$64', booked: 3, trials: 0, trialRev: '$0', trialCompleted: 1, consultsBooked: 9, consultsCompleted: 7, salesConverted: 6, contractValue: '$15,664', conversion: '85.7%', reviews: 0, lateCancel: 15, under2: 67, podAttend: 252, podUtil: '53.0%', ptAttend: 132, gptAttend: 142, gptUtil: '37.0%', visits: 526, avgVisits: 2.49, avgHours: 30.00, wages: '$9,816', wagePct: '42.4%', ler: 2.36, redflags: 28 },
+  { date: '23 Feb', rolling: '$114,800', revenue: '$24,555', dd: '$21,325', failedDD: '$218', addedRev: '$467', lostRev: '$80', diff: '$387', total: 225, active: 214, suspended: 11, cancels: 1, net: 3, paidLeads: 8, organicLeads: 1, totalLeads: 9, cpl: '$70', booked: 4, trials: 0, trialRev: '$0', trialCompleted: 1, consultsBooked: 6, consultsCompleted: 5, salesConverted: 4, contractValue: '$7,632', conversion: '80.0%', reviews: 0, lateCancel: 12, under2: 69, podAttend: 244, podUtil: '51.0%', ptAttend: 110, gptAttend: 143, gptUtil: '35.0%', visits: 497, avgVisits: 2.32, avgHours: 28.00, wages: '$9,816', wagePct: '0%', ler: null, redflags: 26 },
+  { date: '02 Mar', rolling: null, revenue: null, dd: null, failedDD: null, addedRev: '$320', lostRev: '$327', diff: '-$7', total: 225, active: 213, suspended: 12, cancels: 3, net: 0, paidLeads: 13, organicLeads: 1, totalLeads: 14, cpl: '$53', booked: 2, trials: 0, trialRev: '$0', trialCompleted: 1, consultsBooked: 7, consultsCompleted: 6, salesConverted: 3, contractValue: '$5,040', conversion: '50.0%', reviews: 1, lateCancel: null, under2: null, podAttend: 244, podUtil: '48.5%', ptAttend: 120, gptAttend: 144, gptUtil: '33.4%', visits: 508, avgVisits: 2.38, avgHours: null, wages: null, wagePct: null, ler: null, redflags: null },
+];
+
+const monthlyData = {
+  jan: {
+    rolling: '$103,550', rollingTarget: 95000, rollingVal: 103550,
+    weeklyRev: '$21,634', weeklyDD: '$19,643', avgSpend: '$96',
+    failedDD: '$1,909', addedRev: '$1,132', lostRev: '$892', diff: '+$240',
+    total: 214, active: 207, suspended: 7, suspPct: '3.3%',
+    pt: 73, spt: 142, net: '+3',
+    cancels: 8, churn: '3.74%', los: '31', redflags: 28,
+    leads: 51, paidLeads: 30, orgLeads: 21, cpl: '$101', booking: '27.5%',
+    consultsBooked: 11, consultsCompleted: 12, sales: 11, contract: '$17,712', conv: '91.7%',
+    reviews: 3, lateCancel: 17, under2: 70,
+    podAttend: 233, podUtil: '51.2%', ptAttend: 99, gptAttend: 140, gptUtil: '35.5%',
+    visits: 473, avgVisits: '2.31', ler: '2.33', wages: '$37,731', wagePct: '174%',
+    memberGoal: 218
+  },
+  feb: {
+    rolling: '$111,775', rollingTarget: 96000, rollingVal: 111775,
+    weeklyRev: '$24,690', weeklyDD: '$21,478', avgSpend: '$103',
+    failedDD: '$880', addedRev: '$2,149', lostRev: '$881', diff: '+$1,268',
+    total: 225, active: 214, suspended: 11, suspPct: '4.9%',
+    pt: 78, spt: 147, net: '+10',
+    cancels: 8, churn: '3.56%', los: '39', redflags: 28,
+    leads: 54, paidLeads: 38, orgLeads: 16, cpl: '$70', booking: '29.6%',
+    consultsBooked: 28, consultsCompleted: 22, sales: 18, contract: '$38,411', conv: '81.8%',
+    reviews: 1, lateCancel: 13, under2: 62,
+    podAttend: 255, podUtil: '53.1%', ptAttend: 121, gptAttend: 144, gptUtil: '36.5%',
+    visits: 520, avgVisits: '2.43', ler: '—', wages: '$29,112', wagePct: '118%',
+    memberGoal: 226
+  }
+};
+
+// =====================
+// TAB SWITCHING
+// =====================
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('view-' + tab).classList.add('active');
+}
+
+// =====================
+// MONTHLY
+// =====================
+
+let currentMonth = 'jan';
+
+function switchMonth(month, btn) {
+  currentMonth = month;
+  document.querySelectorAll('#view-monthly .month-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMonthly(month);
+}
+
+function renderMonthly(month) {
+  const d = monthlyData[month];
+  if (!d) return;
+
+  document.getElementById('m-rolling').textContent = d.rolling;
+  const pct = Math.min((d.rollingVal / d.rollingTarget) * 100, 120);
+  document.getElementById('m-rolling-bar').style.width = pct + '%';
+
+  document.getElementById('m-weekly-rev').textContent = d.weeklyRev;
+  const weeklyNum = parseFloat(d.weeklyRev.replace(/[$,]/g, ''));
+  const weeklyTarget = month === 'jan' ? 23500 : 24000;
+  const weeklyDelta = document.getElementById('m-weekly-delta');
+  if (weeklyNum >= weeklyTarget) {
+    weeklyDelta.className = 'kpi-delta delta-good';
+    weeklyDelta.textContent = '↑ On target';
+  } else {
+    weeklyDelta.className = 'kpi-delta delta-warn';
+    weeklyDelta.textContent = '↓ Below target';
+  }
+
+  document.getElementById('m-dd').textContent = d.weeklyDD;
+  document.getElementById('m-dd-sub').textContent = 'Target: $' + weeklyTarget.toLocaleString();
+  document.getElementById('m-diff').textContent = d.diff;
+  const diffDelta = document.getElementById('m-diff-delta');
+  const diffNum = parseFloat(d.diff.replace(/[$,+]/g, ''));
+  diffDelta.className = 'kpi-delta ' + (diffNum >= 0 ? 'delta-good' : 'delta-bad');
+  diffDelta.textContent = diffNum >= 0 ? '↑ Growing MRR' : '↓ Shrinking MRR';
+
+  document.getElementById('m-avg-spend').textContent = d.avgSpend;
+  document.getElementById('m-failed-dd').textContent = d.failedDD;
+  document.getElementById('m-added').textContent = d.addedRev;
+  document.getElementById('m-lost').textContent = d.lostRev;
+
+  document.getElementById('m-total').textContent = d.total;
+  document.getElementById('m-total-goal').textContent = d.memberGoal;
+  const totalPct = Math.min((d.total / d.memberGoal) * 100, 100);
+  document.getElementById('m-total-bar').style.width = totalPct + '%';
+
+  document.getElementById('m-active').textContent = d.active;
+  document.getElementById('m-suspended-sub').textContent = d.suspended + ' suspended (' + d.suspPct + ')';
+  document.getElementById('m-pt').textContent = d.pt;
+  document.getElementById('m-spt').textContent = d.spt;
+  document.getElementById('m-net').textContent = d.net;
+
+  document.getElementById('m-cancels').textContent = d.cancels;
+  document.getElementById('m-churn').textContent = d.churn;
+  const churnNum = parseFloat(d.churn);
+  const churnDelta = document.getElementById('m-churn-delta');
+  if (churnNum <= 2) {
+    churnDelta.className = 'kpi-delta delta-good'; churnDelta.textContent = '✓ On target';
+  } else {
+    churnDelta.className = 'kpi-delta delta-bad'; churnDelta.textContent = '↑ Above target';
+  }
+  document.getElementById('m-los').textContent = d.los + ' mo';
+  document.getElementById('m-redflags').textContent = d.redflags;
+
+  document.getElementById('m-leads').textContent = d.leads;
+  document.getElementById('m-leads-sub').textContent = d.paidLeads + ' paid · ' + d.orgLeads + ' organic';
+  document.getElementById('m-cpl').textContent = d.cpl;
+  document.getElementById('m-book').textContent = d.booking;
+  document.getElementById('m-consults').textContent = d.consultsCompleted;
+  document.getElementById('m-consults-sub').textContent = 'of ' + d.consultsBooked + ' booked';
+  document.getElementById('m-conv').textContent = d.conv;
+  document.getElementById('m-contract').textContent = d.contract;
+
+  document.getElementById('m-visits').textContent = d.visits;
+  document.getElementById('m-visits-sub').textContent = d.avgVisits + ' avg per member';
+  document.getElementById('m-pod').textContent = d.podUtil;
+  document.getElementById('m-pod-bar').style.width = parseFloat(d.podUtil) + '%';
+  document.getElementById('m-gpt').textContent = d.gptUtil;
+  document.getElementById('m-ler').textContent = d.ler;
+  document.getElementById('m-reviews').textContent = d.reviews;
+}
+
+// =====================
+// WEEKLY
+// =====================
+
+let currentWeekIdx = 0;
+
+function buildWeekSelector() {
+  const sel = document.getElementById('week-selector');
+  sel.innerHTML = '';
+  weeklyData.forEach((w, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'week-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = w.date;
+    btn.onclick = () => {
+      document.querySelectorAll('.week-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentWeekIdx = i;
+      renderWeek(i);
+    };
+    sel.appendChild(btn);
+  });
+}
+
+function renderWeek(idx) {
+  const w = weeklyData[idx];
+  document.getElementById('week-date-label').textContent = w.date;
+  document.getElementById('w-rolling').textContent = w.rolling || '—';
+  document.getElementById('w-revenue').textContent = w.revenue || '—';
+  document.getElementById('w-dd').textContent = w.dd || '—';
+  document.getElementById('w-failed').textContent = w.failedDD || '—';
+  document.getElementById('w-total').textContent = w.total;
+  document.getElementById('w-active').textContent = w.active;
+  document.getElementById('w-suspended').textContent = w.suspended;
+  document.getElementById('w-cancels').textContent = w.cancels;
+  const netEl = document.getElementById('w-net');
+  netEl.textContent = (w.net >= 0 ? '+' : '') + w.net;
+  netEl.className = 'kpi-value ' + (w.net >= 0 ? 'td-good' : 'td-bad');
+  document.getElementById('w-leads').textContent = w.totalLeads;
+  document.getElementById('w-leads-sub').textContent = w.paidLeads + ' paid · ' + w.organicLeads + ' organic';
+  document.getElementById('w-booked').textContent = w.booked;
+  document.getElementById('w-booking-pct').textContent = 'of ' + w.totalLeads + ' leads';
+  document.getElementById('w-sales').textContent = w.salesConverted;
+  document.getElementById('w-conv-pct').textContent = w.conversion + ' conversion';
+  document.getElementById('w-contract').textContent = w.contractValue;
+  document.getElementById('w-visits').textContent = w.visits;
+  document.getElementById('w-pod').textContent = w.podUtil;
+  document.getElementById('w-gpt').textContent = w.gptUtil;
+  document.getElementById('w-redflags').textContent = w.redflags || '—';
+  document.getElementById('w-ler').textContent = w.ler ? w.ler.toFixed(2) : '—';
+}
+
+function buildWeeklyTrendTable() {
+  const body = document.getElementById('weekly-trend-body');
+  weeklyData.forEach(w => {
+    const tr = document.createElement('tr');
+    const netClass = w.net >= 0 ? 'td-good' : 'td-bad';
+    const lerVal = w.ler ? w.ler.toFixed(2) : '—';
+    const lerClass = w.ler && w.ler >= 2.5 ? 'td-good' : (w.ler && w.ler >= 2 ? 'td-warn' : 'td-bad');
+    tr.innerHTML = `
+      <td style="color:var(--accent);font-weight:500">${w.date}</td>
+      <td>${w.rolling || '—'}</td>
+      <td>${w.revenue || '—'}</td>
+      <td>${w.total}</td>
+      <td class="td-bad">${w.cancels}</td>
+      <td class="${netClass}">${(w.net >= 0 ? '+' : '') + w.net}</td>
+      <td>${w.totalLeads}</td>
+      <td class="td-good">${w.salesConverted}</td>
+      <td>${w.conversion}</td>
+      <td>${w.visits}</td>
+      <td class="${lerClass}">${lerVal}</td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+// =====================
+// DAILY
+// =====================
+
+function switchDailyMonth(month, btn) {
+  document.querySelectorAll('#view-daily .month-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const labels = { jan: 'January', feb: 'February', mar: 'March' };
+  document.getElementById('daily-month-label').textContent = labels[month];
+  renderDailyTable(month);
+}
+
+function renderDailyTable(month) {
+  const days = month === 'feb' ? 28 : 31;
+  const body = document.getElementById('daily-table-body');
+  body.innerHTML = '';
+  for (let i = 1; i <= days; i++) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--muted);font-size:11px">${i}</td>
+      <td class="empty" style="color:#333">—</td>
+      <td class="empty" style="color:#333">—</td>
+      <td class="empty" style="color:#333">—</td>
+      <td class="empty" style="color:#333">—</td>
+      <td class="empty" style="color:#333">—</td>
+      <td class="empty" style="color:#333">—</td>
+      <td class="empty" style="color:#333">—</td>
+      <td class="empty" style="color:#333">—</td>
+      <td style="color:#333;font-family:'DM Mono',monospace">0</td>
+      <td class="empty" style="color:#333">—</td>
+      <td class="empty" style="color:#333">—</td>
+    `;
+    body.appendChild(tr);
+  }
+}
+
+// =====================
+// DATE
+// =====================
+
+function setDate() {
+  const d = new Date();
+  const opts = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
+  document.getElementById('current-date').textContent = d.toLocaleDateString('en-AU', opts).toUpperCase();
+}
+
+// =====================
+// INIT
+// =====================
+
+setDate();
+renderMonthly('jan');
+buildWeekSelector();
+renderWeek(0);
+buildWeeklyTrendTable();
+renderDailyTable('jan');
+</script>
+</body>
+</html>
